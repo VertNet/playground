@@ -1,0 +1,22 @@
+application: vn-app
+version: playground
+runtime: python27
+threadsafe: true
+api_version: 1
+
+handlers:
+
+- url: /app
+  static_dir: app
+
+- url: /app/src
+  static_dir: app/src
+
+- url: /app/css
+  static_dir: app/css
+
+- url: /app/img
+  static_dir: app/img
+
+- url: /app/lib
+  static_dir: app/lib

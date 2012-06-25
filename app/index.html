@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>VertNet Playground</title>
+    <link rel="shortcut icon" href="http://cartodb.com/favicon/favicon_32x32.ico" />
+    <link href="http://code.google.com/apis/maps/documentation/javascript/examples/default.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="css/cartodb-gmapsv3.css">
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+    <script src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+    <script src="lib/wax.g.min-6.2.0-touched.js"></script>
+    <script src="lib/cartodb-gmapsv3-min.js"></script>
+    <script src="lib/underscore-min.js"></script>
+    <script src="lib/backbone.js"></script>
+    <script src="lib/cartodb-infowindow-min.js"></script>
+    <script src="lib/class.js"></script>
+    <script src="lib/backbone.cartodb.js"></script>
+    <script src="src/vertnet.js"></script>
+</head>
+<body>
+  <div id="map_canvas"></div>
+  <div class="torque_time" ></div>
+  <a class="cartodb_logo" href="http://www.cartodb.com" target="_blank">CartoDB</a>
+  <script type="text/javascript">
+    $(document).ready(function() {
+        console.log('hi');
+        VertNet(function(vertnet) {
+            mapEngine = new vertnet.map.Engine(null, null);
+            mapEngine.start('#map_canvas');
+            layerEngine = new vertnet.layer.Engine(null, mapEngine.map, 0);
+            layerEngine.start();
+          }
+        );
+      }
+    );
+  </script>
+</body>
+</html>
