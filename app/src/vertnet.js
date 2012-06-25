@@ -180,7 +180,7 @@ VertNet.modules.layer = function (vertnet) {
                 if (className === '') {
                     return;
                 }
-                if (className === 'All') {
+                if (className === 'All Classes') {
                     sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class "
                           + "FROM loc, tax t, tax_loc l, occ o "
                           + "WHERE t.tax_id = l.tax_id "
@@ -226,7 +226,7 @@ VertNet.modules.layer = function (vertnet) {
                 var html = '' +
                     '<div class="LayerDisplay">' +
                     '  <select>' +
-                    '     <option value="all">All classes</option>' +
+                    '     <option value="all">All Classes</option>' +
                     '     <option value="line">.............</option>' +                                                            
                     '     <option value="birds">Aves</option>' +
                     '     <option value="herps">Herps</option>' +
