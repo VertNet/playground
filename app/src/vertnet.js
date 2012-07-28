@@ -148,7 +148,7 @@ VertNet.modules.layer = function (vertnet) {
             featureOver: function(feature, latlng, pos, data) {
               self.map.setOptions({draggableCursor:'pointer'});
             },
-            auto_bound: true
+            auto_bound: false
           }
         );
         this.wireHandler();
@@ -213,7 +213,7 @@ VertNet.modules.layer = function (vertnet) {
             featureOver: function(feature, latlng, pos, data) {
               self.map.setOptions({draggableCursor:'pointer'});
             },
-            auto_bound: true
+            auto_bound: false
           }
         );
       }
