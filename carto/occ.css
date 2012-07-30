@@ -24,4 +24,16 @@
         marker-fill:brown;
         marker-line-color:white;
     }   
+    [class='Actinopterygii'] {
+        marker-fill:purple;
+        marker-line-color:white;
+    }
+    [class='Elasmobranchii'] {
+        marker-fill:black;
+        marker-line-color:white;
+    }
+    [class='Holocephali'] {
+        marker-fill:red;
+        marker-line-color:white;
+    }
 }

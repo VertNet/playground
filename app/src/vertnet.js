@@ -226,10 +226,12 @@ VertNet.modules.layer = function (vertnet) {
         var html = '' +
           '<div class="LayerDisplay">' +
           '  <select>' +
-          '     <option value="all">All Classes</option>' +
-          '     <option value="line">.............</option>' + 
+          '     <option value="all">All Classes</option>' +              
+          '     <option value="Actinopterygii">Actinopterygii</option>' +    
           '     <option value="Amphibia">Amphibia</option>' +
           '     <option value="Aves">Aves</option>' +
+          '     <option value="Elasmobranchii">Elasmobranchii</option>' +    
+          '     <option value="Holocephali">Holocephali</option>' +                  
           '     <option value="Mammalia">Mammalia</option>' +
           '     <option value="Reptilia">Reptilia</option>' +
           '  </select>' +
