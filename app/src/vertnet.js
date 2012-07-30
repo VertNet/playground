@@ -130,13 +130,13 @@ VertNet.modules.layer = function (vertnet) {
             map: this.map,
             user_name:'vertnet',
             table_name: 'occ',
-            query: "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class "
+            query: "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.institutioncode "
               + "FROM loc, tax t, tax_loc l, occ o "
               + "WHERE t.tax_id = l.tax_id "
               + "AND loc.loc_id = l.loc_id "
               + "AND o.tax_loc_id = l.tax_loc_id",
             layer_order: "top",
-            interactivity: "cartodb_id, name, class",
+            interactivity: "cartodb_id, name, class, catalognumber, institutioncode",
             featureClick: function(feature, latlng, pos, data) {
               self.infowindow.setContent(data);
               self.infowindow.setPosition(latlng);
@@ -169,7 +169,7 @@ VertNet.modules.layer = function (vertnet) {
       },
       
       update: function(className) {
-        var sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class " + 
+        var sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.institutioncode " + 
           "FROM loc, tax t, tax_loc l, occ o " + 
           "WHERE t.tax_id = l.tax_id AND " +
           "loc.loc_id = l.loc_id AND " +
@@ -181,13 +181,13 @@ VertNet.modules.layer = function (vertnet) {
           return;
         }
         if (className === 'All Classes') {
-          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class "
+          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.institutioncode "
             + "FROM loc, tax t, tax_loc l, occ o "
             + "WHERE t.tax_id = l.tax_id "
             + "AND loc.loc_id = l.loc_id "
             + "AND o.tax_loc_id = l.tax_loc_id";
         } else if (className === 'All Points') {
-          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, 'Unknown' as \"class\"  "
+          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, 'Unknown' as \"class\", o.catalognumber, o.institutioncode  "
             + "FROM loc, tax t, tax_loc l "
             + "where t.tax_id = l.tax_id and loc.loc_id = l.loc_id";
         } else {
@@ -201,7 +201,7 @@ VertNet.modules.layer = function (vertnet) {
             table_name: 'occ',
             query: sql,
             layer_order: "top",
-            interactivity: "cartodb_id, name, class",
+            interactivity: "cartodb_id, name, class, catalognumber, institutioncode",
             featureClick: function(feature, latlng, pos, data) {
               self.infowindow.setContent(data);
               self.infowindow.setPosition(latlng);
