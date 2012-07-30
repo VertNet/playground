@@ -1,0 +1,39 @@
+#occ {
+    marker-fill:#FF6600;
+    marker-width:4;
+    marker-line-color:white;
+    marker-line-width:1;
+    marker-opacity:1;
+    marker-line-opacity:1;
+    marker-placement:point;
+    marker-type:ellipse;
+    marker-allow-overlap:true;
+    [class='Aves'] {
+        marker-fill:yellow;
+        marker-line-color:grey;
+    }
+    [class='Mammalia'] {
+        marker-fill:blue;
+        marker-line-color:white;
+    }
+    [class='Amphibia'] {
+        marker-fill:green;
+        marker-line-color:white;
+    }
+    [class='Reptilia'] {
+        marker-fill:brown;
+        marker-line-color:white;
+    }   
+    [class='Actinopterygii'] {
+        marker-fill:purple;
+        marker-line-color:white;
+    }
+    [class='Elasmobranchii'] {
+        marker-fill:black;
+        marker-line-color:white;
+    }
+    [class='Holocephali'] {
+        marker-fill:red;
+        marker-line-color:white;
+    }
+}
