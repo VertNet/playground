@@ -109,6 +109,7 @@ VertNet.modules.layer = function (vertnet) {
   vertnet.layer.Engine = vertnet.mvp.Engine.extend(
     {
       init: function (bus, map, index) {
+        this.parseUrl();
         this.bus = bus;
         this.map = map;
         this.index = index;
@@ -117,10 +118,24 @@ VertNet.modules.layer = function (vertnet) {
         this.infowindow = new CartoDBInfowindow(this.map);
       },
       
+      parseUrl: function() {
+        var a = /\+/g,  // Regex for replacing addition symbol with a space
+        r = /([^&=]+)=?([^&]*)/g,
+        d = function (s) { return decodeURIComponent(s.replace(a, " ")); },
+        q = window.location.search.substring(1);
+        
+        this.urlParams = {};
+        
+        // Parses URL parameters:
+        while ((e = r.exec(q))) {
+          this.urlParams[d(e[1])] = d(e[2]);
+        };
+      },
+
       start: function () {
         var self = this,
-        pos = google.maps.ControlPosition.TOP_RIGHT;
-        
+        pos = google.maps.ControlPosition.TOP_RIGHT,
+        sql = this.urlParams['sql'];
         
         this.display = new vertnet.layer.Display();
         this.display.toggle(true);
@@ -131,7 +146,7 @@ VertNet.modules.layer = function (vertnet) {
             map: this.map,
             user_name:'vertnet',
             table_name: 'occ',
-            query: "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode "
+            query: sql ? sql : "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode "
               + "FROM loc, tax t, taxloc l, occ o "
               + "WHERE t.tax_id = l.tax_id "
               + "AND loc.loc_id = l.loc_id "
@@ -185,7 +200,7 @@ VertNet.modules.layer = function (vertnet) {
           "lower(o.icode) = '{0}' ",
         self = this,
         type = null,
-        sql = null;
+        sql = this.urlParams['sql'];
 
         if (name.split('i-').length === 2) {
           type = 'icode';
@@ -194,7 +209,7 @@ VertNet.modules.layer = function (vertnet) {
           type = 'class'
         }
         
-        if (name === '') {
+        if (name === '' && sql === undefined) {
           return;
         }
         if (name === 'All Classes') {
@@ -208,9 +223,9 @@ VertNet.modules.layer = function (vertnet) {
             + "FROM loc, tax t, tax_loc l "
             + "where t.tax_id = l.tax_id and loc.loc_id = l.loc_id";
         } else if (type === 'icode') {
-          sql = isql.format(name.toLowerCase());                   
+          sql = sql ? sql : isql.format(name.toLowerCase());                   
         } else {
-          sql = csql.format(name.toLowerCase());
+          sql = sql ? sql : csql.format(name.toLowerCase());
         }
         this.cdb.setMap(null);
         this.cdb = new CartoDBLayer(
