@@ -125,18 +125,19 @@ VertNet.modules.layer = function (vertnet) {
         this.display = new vertnet.layer.Display();
         this.display.toggle(true);
         this.map.controls[pos].push(this.display[0]);
+
         this.cdb = new CartoDBLayer(
           {
             map: this.map,
             user_name:'vertnet',
             table_name: 'occ',
-            query: "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.institutioncode "
-              + "FROM loc, tax t, tax_loc l, occ o "
+            query: "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode "
+              + "FROM loc, tax t, taxloc l, occ o "
               + "WHERE t.tax_id = l.tax_id "
               + "AND loc.loc_id = l.loc_id "
               + "AND o.tax_loc_id = l.tax_loc_id",
             layer_order: "top",
-            interactivity: "cartodb_id, name, class, catalognumber, institutioncode",
+            interactivity: "cartodb_id, name, class, catalognumber, icode",
             featureClick: function(feature, latlng, pos, data) {
               self.infowindow.setContent(data);
               self.infowindow.setPosition(latlng);
@@ -162,36 +163,54 @@ VertNet.modules.layer = function (vertnet) {
             var str = "";
             $("select option:selected").each(
               function () {
-                str += $(this).text();
+                //str += $(this).text();
+                str += this.value;
               });
             self.update(str);
-          }).change();                    
+          }).change();       
       },
       
-      update: function(className) {
-        var sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.institutioncode " + 
-          "FROM loc, tax t, tax_loc l, occ o " + 
+      update: function(name) {
+        var csql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode " + 
+          "FROM loc, tax t, taxloc l, occ o " + 
           "WHERE t.tax_id = l.tax_id AND " +
           "loc.loc_id = l.loc_id AND " +
           "o.tax_loc_id = l.tax_loc_id AND " +
           "lower(o._classs) = '{0}' ",
-        self = this;;
+        isql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode " + 
+          "FROM loc, tax t, taxloc l, occ o " + 
+          "WHERE t.tax_id = l.tax_id AND " +
+          "loc.loc_id = l.loc_id AND " +
+          "o.tax_loc_id = l.tax_loc_id AND " +
+          "lower(o.icode) = '{0}' ",
+        self = this,
+        type = null,
+        sql = null;
+
+        if (name.split('i-').length === 2) {
+          type = 'icode';
+          name = name.split('i-')[1];
+        } else {
+          type = 'class'
+        }
         
-        if (className === '') {
+        if (name === '') {
           return;
         }
-        if (className === 'All Classes') {
-          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.institutioncode "
-            + "FROM loc, tax t, tax_loc l, occ o "
+        if (name === 'All Classes') {
+          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode "
+            + "FROM loc, tax t, taxloc l, occ o "
             + "WHERE t.tax_id = l.tax_id "
             + "AND loc.loc_id = l.loc_id "
             + "AND o.tax_loc_id = l.tax_loc_id";
-        } else if (className === 'All Points') {
-          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, 'Unknown' as \"class\", o.catalognumber, o.institutioncode  "
+        } else if (name === 'All Points') {
+          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, 'Unknown' as \"class\", o.catalognumber, o.icode  "
             + "FROM loc, tax t, tax_loc l "
             + "where t.tax_id = l.tax_id and loc.loc_id = l.loc_id";
+        } else if (type === 'icode') {
+          sql = isql.format(name.toLowerCase());                   
         } else {
-          sql = sql.format(className.toLowerCase());                   
+          sql = csql.format(name.toLowerCase());
         }
         this.cdb.setMap(null);
         this.cdb = new CartoDBLayer(
@@ -201,7 +220,7 @@ VertNet.modules.layer = function (vertnet) {
             table_name: 'occ',
             query: sql,
             layer_order: "top",
-            interactivity: "cartodb_id, name, class, catalognumber, institutioncode",
+            interactivity: "cartodb_id, name, class, catalognumber, icode",
             featureClick: function(feature, latlng, pos, data) {
               self.infowindow.setContent(data);
               self.infowindow.setPosition(latlng);
@@ -234,6 +253,24 @@ VertNet.modules.layer = function (vertnet) {
           '     <option value="Holocephali">Holocephali</option>' +                  
           '     <option value="Mammalia">Mammalia</option>' +
           '     <option value="Reptilia">Reptilia</option>' +
+          '     <option value="i-CAS">CAS</option>' +
+          '     <option value="i-CMC">CMC</option>' +
+          '     <option value="i-CRCM">CRCM</option>' +
+          '     <option value="i-DMNH">DMNH</option>' +
+          '     <option value="i-FLMNH">FLMNH</option>' +
+          '     <option value="i-FMNH">FMNH</option>' +
+          '     <option value="i-HSU">HSU</option>' +
+          '     <option value="i-ISU">ISU</option>' +
+          '     <option value="i-KUBI">KUBI</option>' +
+          '     <option value="i-MPM">MPM</option>' +
+          '     <option value="i-NMMNH">NMMNH</option>' +
+          '     <option value="i-NYSM">NYSM</option>' +
+          '     <option value="i-SMNS">SMNS</option>' +
+          '     <option value="i-TCWC">TCWC</option>' +
+          '     <option value="i-TTRS">TTRS</option>' +
+          '     <option value="i-UBC">UBC</option>' +
+          '     <option value="i-UNR">UNR</option>' +
+          '     <option value="i-WFVZ">WFVZ</option>' +
           '  </select>' +
           '</div>';
         this._super(html);
