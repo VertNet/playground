@@ -109,6 +109,7 @@ VertNet.modules.layer = function (vertnet) {
   vertnet.layer.Engine = vertnet.mvp.Engine.extend(
     {
       init: function (bus, map, index) {
+        var self = this;
         this.parseUrl();
         this.bus = bus;
         this.map = map;
@@ -116,6 +117,97 @@ VertNet.modules.layer = function (vertnet) {
         this.bounds = new google.maps.LatLngBounds();
         this.cdb = null;
         this.infowindow = new CartoDBInfowindow(this.map);
+        this.search = new vertnet.layer.SearchDisplay();
+        this.search.toggle(true);
+        this.initAutocomplete();
+        this.searching = {};
+        this.names = [];
+        
+        this.search.goButton.click(
+          function(event) {
+				self.update(self.search.searchBox.val(), true);
+          }
+        );
+
+        this.search.searchBox.keyup(
+          function(event) {
+            if (event.keyCode === 13) {
+              $(this).autocomplete("close");
+              self.update($(this).val(), true);
+            }
+          }
+        );
+      },
+
+      initAutocomplete: function() {
+        this.populateAutocomplete(null, null);
+
+        $.ui.autocomplete.prototype._renderItem = function (ul, item) {
+
+          item.label = item.label.replace(
+            new RegExp("(?![^&;]+;)(?!<[^<>]*)(" +
+                       $.ui.autocomplete.escapeRegex(this.term) +
+                       ")(?![^<>]*>)(?![^&;]+;)", "gi"), "<strong>$1</strong>");
+          return $('<li></li>')
+            .data("item.autocomplete", item)
+            .append("<a>" + item.label + "</a>")
+            .appendTo(ul);
+        };
+      },
+
+      populateAutocomplete : function(action, response) {
+		  var self = this;
+        $(this.search.searchBox).autocomplete(
+          {
+            minLength: 3, // Note: Auto-complete indexes are min length 3.
+            source: function(request, response) {
+              $.get(
+                'http://vertnet.cartodb.com/api/v2/sql',
+                {
+                  q:"SELECT name from tax where lower(name)~*'\\m{0}'".format(request.term)
+                },
+                function (json) {
+                  var names = [],scinames=[];
+                  _.each (
+                    json.rows,
+                    function(row) {
+                      var sci, eng;
+                      if(row.name != undefined){
+                        sci = row.name;
+                        names.push({label:'<div class="ac-item">{0}</div>'.format(sci), value:sci});
+                        scinames.push(sci)
+
+                      }
+                    }
+                  );
+                  if(scinames.length>0) {
+                    self.names=scinames;
+                  }
+                  response(names);
+                  //self.bus.fireEvent(new mol.bus.Event('hide-loading-indicator', {source : "autocomplete"}));
+                },
+                'json'
+              );
+            },
+
+            select: function(event, ui) {
+              self.searching[ui.item.value] = false;
+              self.names = [ui.item.value];
+              self.update(ui.item.value, true);
+            },
+            close: function(event,ui) {
+
+            },
+            search: function(event, ui) {
+              self.searching[$(this).val()] = true;
+              self.names=[];
+              //self.bus.fireEvent(new mol.bus.Event('show-loading-indicator', {source : "autocomplete"}));
+            },
+            open: function(event, ui) {
+              self.searching[$(this).val()] = false;
+              //self.bus.fireEvent(new mol.bus.Event('hide-loading-indicator', {source : "autocomplete"}));
+            }
+          });
       },
       
       parseUrl: function() {
@@ -137,9 +229,11 @@ VertNet.modules.layer = function (vertnet) {
         pos = google.maps.ControlPosition.TOP_RIGHT,
         sql = this.urlParams['sql'];
         
+
         this.display = new vertnet.layer.Display();
         this.display.toggle(true);
         this.map.controls[pos].push(this.display[0]);
+        this.map.controls[pos].push(this.search[0]);
 
         this.cdb = new CartoDBLayer(
           {
@@ -185,7 +279,7 @@ VertNet.modules.layer = function (vertnet) {
           }).change();       
       },
       
-      update: function(name) {
+      update: function(name, sciname) {
         var csql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode " + 
           "FROM loc, tax t, taxloc l, occ o " + 
           "WHERE t.tax_id = l.tax_id AND " +
@@ -198,9 +292,19 @@ VertNet.modules.layer = function (vertnet) {
           "loc.loc_id = l.loc_id AND " +
           "o.tax_loc_id = l.tax_loc_id AND " +
           "lower(o.icode) = '{0}' ",
+        snsql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode " + 
+          "FROM loc, tax t, taxloc l, occ o " + 
+          "WHERE t.tax_id = l.tax_id AND " +
+          "loc.loc_id = l.loc_id AND " +
+          "o.tax_loc_id = l.tax_loc_id AND " +
+          "t.name = '{0}' ",
         self = this,
         type = null,
         sql = this.urlParams['sql'];
+
+        if (name === 'nop') {
+          return;
+        }
 
         if (name.split('i-').length === 2) {
           type = 'icode';
@@ -212,13 +316,13 @@ VertNet.modules.layer = function (vertnet) {
         if (name === '' && sql === undefined) {
           return;
         }
-        if (name === 'All Classes') {
+        if (name === 'all') {
           sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, o._classs as class, o.catalognumber, o.icode "
             + "FROM loc, tax t, taxloc l, occ o "
             + "WHERE t.tax_id = l.tax_id "
             + "AND loc.loc_id = l.loc_id "
             + "AND o.tax_loc_id = l.tax_loc_id";
-        } else if (name === 'All Points') {
+        } else if (name === 'A') {
           sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, 'Unknown' as \"class\", o.catalognumber, o.icode  "
             + "FROM loc, tax t, tax_loc l "
             + "where t.tax_id = l.tax_id and loc.loc_id = l.loc_id";
@@ -227,6 +331,11 @@ VertNet.modules.layer = function (vertnet) {
         } else {
           sql = sql ? sql : csql.format(name.toLowerCase());
         }
+        
+        if (sciname) {
+          sql = snsql.format(name.trim());
+        }
+
         this.cdb.setMap(null);
         this.cdb = new CartoDBLayer(
           {
@@ -253,6 +362,26 @@ VertNet.modules.layer = function (vertnet) {
       }
     }
   );
+
+  vertnet.layer.SearchDisplay = vertnet.mvp.View.extend(
+    {
+      init: function() {
+        var html = '' +
+          '<div class="title ui-autocomplete-input">' +
+          '    <input id="value" type="text" placeholder="Search by species name">' +
+          '    <button id="execute">Go</button>' +
+          '</div>';
+
+        this._super(html);
+        this.goButton = $(this).find('#execute');
+        this.searchBox = $(this).find('#value');
+      },
+
+      clear: function() {
+        this.searchBox.html('');
+      }
+    }
+  ),
   
   vertnet.layer.Display = vertnet.mvp.View.extend(
     {
@@ -268,6 +397,7 @@ VertNet.modules.layer = function (vertnet) {
           '     <option value="Holocephali">Holocephali</option>' +                  
           '     <option value="Mammalia">Mammalia</option>' +
           '     <option value="Reptilia">Reptilia</option>' +
+          '     <option value="nop">................</option>' +
           '     <option value="i-CAS">CAS</option>' +
           '     <option value="i-CMC">CMC</option>' +
           '     <option value="i-CRCM">CRCM</option>' +

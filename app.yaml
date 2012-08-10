@@ -8,6 +8,7 @@ handlers:
 
 - url: /app
   static_dir: app
+  login: admin
 
 - url: /app/src
   static_dir: app/src
