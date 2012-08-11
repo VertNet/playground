@@ -322,18 +322,17 @@ VertNet.modules.layer = function (vertnet) {
             + "WHERE t.tax_id = l.tax_id "
             + "AND loc.loc_id = l.loc_id "
             + "AND o.tax_loc_id = l.tax_loc_id";
-        } else if (name === 'A') {
-          sql = "SELECT loc.the_geom, loc.the_geom_webmercator, t.cartodb_id, t.name, 'Unknown' as \"class\", o.catalognumber, o.icode  "
-            + "FROM loc, tax t, tax_loc l "
-            + "where t.tax_id = l.tax_id and loc.loc_id = l.loc_id";
-        } else if (type === 'icode') {
+        }  else if (type === 'icode') {
           sql = sql ? sql : isql.format(name.toLowerCase());                   
         } else {
           sql = sql ? sql : csql.format(name.toLowerCase());
         }
         
         if (sciname) {
+          this.display.clear();
           sql = snsql.format(name.trim());
+        } else {
+          this.search.clear();
         }
 
         this.cdb.setMap(null);
@@ -378,7 +377,7 @@ VertNet.modules.layer = function (vertnet) {
       },
 
       clear: function() {
-        this.searchBox.html('');
+        this.searchBox.val('');
       }
     }
   ),
@@ -388,15 +387,22 @@ VertNet.modules.layer = function (vertnet) {
       init: function() {
         var html = '' +
           '<div class="LayerDisplay">' +
-          '  <select>' +
+          '  <select name="menu" id="menu">' +
           '     <option value="all">All Classes</option>' +              
-          '     <option value="Actinopterygii">Actinopterygii</option>' +    
-          '     <option value="Amphibia">Amphibia</option>' +
-          '     <option value="Aves">Aves</option>' +
-          '     <option value="Elasmobranchii">Elasmobranchii</option>' +    
-          '     <option value="Holocephali">Holocephali</option>' +                  
-          '     <option value="Mammalia">Mammalia</option>' +
-          '     <option value="Reptilia">Reptilia</option>' +
+          '     <option value="Actinistia">Actinistia</option>' + 
+          '     <option value="Actinopterygii">Actinopterygii</option>' + 
+          '     <option value="Amphibia">Amphibia</option>' + 
+          '     <option value="Aves">Aves</option>' + 
+          '     <option value="Cephalaspidomorphi">Cephalaspidomorphi</option>' + 
+          '     <option value="Cephalochordata">Cephalochordata</option>' + 
+          '     <option value="Chondrichthyes">Chondrichthyes</option>' + 
+          '     <option value="Dipnoi">Dipnoi</option>' + 
+          '     <option value="Elasmobranchii">Elasmobranchii</option>' + 
+          '     <option value="Holocephali">Holocephali</option>' + 
+          '     <option value="Mammalia">Mammalia</option>' + 
+          '     <option value="Myxini">Myxini</option>' + 
+          '     <option value="Reptilia">Reptilia</option>' + 
+          '     <option value="Sarcopterygii">Sarcopterygii</option>' + 
           '     <option value="nop">................</option>' +
           '     <option value="i-CAS">CAS</option>' +
           '     <option value="i-CMC">CMC</option>' +
@@ -419,6 +425,11 @@ VertNet.modules.layer = function (vertnet) {
           '  </select>' +
           '</div>';
         this._super(html);
+        this.menu = $(this).find('#menu');
+      },
+
+      clear: function() {
+        this.menu[0].selectedIndex = 0;
       }
     }
   );

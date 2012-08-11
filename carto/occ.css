@@ -24,16 +24,8 @@
         marker-fill:brown;
         marker-line-color:white;
     }   
-    [class='Actinopterygii'] {
+    [class='Actinistia'], [class='Actinopterygii'], [class='Cephalaspidomorphi'], [class='Cephalochordata'], [class='Chondrichthyes'], [class='Dipnoi'], [class='Elasmobranchii'], [class='Holocephali'], [class='Myxini'], [class='Sarcopterygii'][class='Actinopterygii'] {
         marker-fill:purple;
-        marker-line-color:white;
-    }
-    [class='Elasmobranchii'] {
-        marker-fill:black;
-        marker-line-color:white;
-    }
-    [class='Holocephali'] {
-        marker-fill:red;
         marker-line-color:white;
     }
 }
